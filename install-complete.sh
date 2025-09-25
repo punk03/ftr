@@ -103,9 +103,14 @@ git pull origin main
 
 # Установка зависимостей PHP
 log "Устанавливаем зависимости PHP..."
-cd /var/www/ftr
-pwd
+cd /var/www/ftr || { echo "Ошибка: не удалось перейти в /var/www/ftr"; exit 1; }
+log "Текущая директория: $(pwd)"
+log "Содержимое директории:"
 ls -la
+if [ ! -f "composer.json" ]; then
+    error "Файл composer.json не найден в директории $(pwd)"
+    exit 1
+fi
 composer install --no-dev --optimize-autoloader
 
 # Настройка прав доступа
