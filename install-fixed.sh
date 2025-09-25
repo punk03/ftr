@@ -39,7 +39,7 @@ apt update && apt upgrade -y
 
 # Исправление проблемы с apt_pkg
 log "Исправляем проблему с apt_pkg..."
-apt install -y python3-apt python3-apt-dbg
+apt install -y python3-apt
 
 # Добавление репозитория PHP вручную (обход проблемы с add-apt-repository)
 log "Добавляем репозиторий PHP..."
