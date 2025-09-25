@@ -36,6 +36,12 @@ fi
 log "Обновляем систему..."
 apt update && apt upgrade -y
 
+# Добавление репозитория PHP
+log "Добавляем репозиторий PHP..."
+apt install -y software-properties-common
+add-apt-repository ppa:ondrej/php -y
+apt update
+
 # Установка необходимых пакетов
 log "Устанавливаем необходимые пакеты..."
 apt install -y \
