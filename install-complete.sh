@@ -104,6 +104,8 @@ git pull origin main
 # Установка зависимостей PHP
 log "Устанавливаем зависимости PHP..."
 cd /var/www/ftr
+pwd
+ls -la
 composer install --no-dev --optimize-autoloader
 
 # Настройка прав доступа
