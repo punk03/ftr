@@ -103,13 +103,14 @@ git pull origin main
 
 # Установка зависимостей PHP
 log "Устанавливаем зависимости PHP..."
+cd /var/www/ftr
 composer install --no-dev --optimize-autoloader
 
 # Настройка прав доступа
 log "Настраиваем права доступа..."
 chown -R www-data:www-data $PROJECT_DIR
 chmod -R 755 $PROJECT_DIR
-chmod -R 775 storage bootstrap/cache
+chmod -R 775 $PROJECT_DIR/storage $PROJECT_DIR/bootstrap/cache
 
 # Создание файла окружения
 log "Создаем файл окружения..."
@@ -163,7 +164,7 @@ server {
     error_page 404 /index.php;
 
     location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
         fastcgi_param SCRIPT_FILENAME \$realpath_root\$fastcgi_script_name;
         include fastcgi_params;
     }
@@ -213,7 +214,7 @@ php artisan route:cache
 php artisan view:cache
 
 # Перезапуск PHP-FPM
-systemctl restart php-fpm
+systemctl restart php8.3-fpm
 
 echo "✅ Обновление завершено!"
 EOF
@@ -248,14 +249,14 @@ chmod +x backup.sh
 
 # Перезапуск сервисов
 log "Перезапускаем сервисы..."
-systemctl restart php-fpm
+systemctl restart php8.3-fpm
 systemctl restart nginx
 systemctl restart mysql
 
 # Проверка статуса сервисов
 log "Проверяем статус сервисов..."
 systemctl is-active --quiet nginx && echo "✅ Nginx работает" || echo "❌ Nginx не работает"
-systemctl is-active --quiet php-fpm && echo "✅ PHP-FPM работает" || echo "❌ PHP-FPM не работает"
+systemctl is-active --quiet php8.3-fpm && echo "✅ PHP-FPM работает" || echo "❌ PHP-FPM не работает"
 systemctl is-active --quiet mysql && echo "✅ MySQL работает" || echo "❌ MySQL не работает"
 
 # Проверка версии PHP
