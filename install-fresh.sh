@@ -32,7 +32,11 @@ rm -f /etc/cron.d/ftr-backup
 echo "🧹 Очищаем проблемные репозитории..."
 rm -f /etc/apt/sources.list.d/sury-php.list
 rm -f /etc/apt/sources.list.d/ondrej-ubuntu-php-*.list
+rm -f /etc/apt/sources.list.d/ondrej-*.list
+rm -f /etc/apt/sources.list.d/*sury*.list
+rm -f /etc/apt/sources.list.d/*ondrej*.list
 apt-key del 4F4EA0AAE5267A6C 2>/dev/null || true
+apt-key del 14AA40EC0831756756D7F66C4F4EA0AAE5267A6C 2>/dev/null || true
 
 # Обновление системы
 echo "📦 Обновляем систему..."
