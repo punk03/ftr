@@ -77,6 +77,11 @@ apt install -y \
     cron \
     rsync
 
+# Запуск MySQL
+echo "🗄️  Запускаем MySQL..."
+systemctl start mysql
+systemctl enable mysql
+
 # Настройка MySQL
 echo "🗄️  Настраиваем MySQL..."
 mysql_secure_installation <<EOF
