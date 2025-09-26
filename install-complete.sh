@@ -116,11 +116,12 @@ if [ ! -f "artisan" ]; then
   rm -rf "$TMP_LARA"
   mkdir -p "$TMP_LARA"
   composer create-project --quiet --no-dev --prefer-dist laravel/laravel:^10.0 "$TMP_LARA"
-  [ -f artisan ] || cp -n "$TMP_LARA/artisan" ./
-  [ -f server.php ] || cp -n "$TMP_LARA/server.php" ./
+  # Копируем только недостающие файлы, не перезаписывая существующие
+  if [ ! -f artisan ] && [ -f "$TMP_LARA/artisan" ]; then cp "$TMP_LARA/artisan" ./; fi
+  if [ ! -f server.php ] && [ -f "$TMP_LARA/server.php" ]; then cp "$TMP_LARA/server.php" ./; fi
   for d in bootstrap public config; do
-    if [ ! -d "$d" ]; then
-      cp -rn "$TMP_LARA/$d" ./
+    if [ ! -d "$d" ] && [ -d "$TMP_LARA/$d" ]; then
+      rsync -a "$TMP_LARA/$d" ./
     fi
   done
   rm -rf "$TMP_LARA"
