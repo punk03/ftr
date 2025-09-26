@@ -68,6 +68,7 @@ apt install -y \
     php-mbstring \
     php-bcmath \
     php-intl \
+    php-sqlite3 \
     nginx \
     mysql-server \
     composer \
@@ -122,9 +123,9 @@ echo "📦 Устанавливаем зависимости..."
 if [ ! -f "artisan" ]; then
     echo "⚠️  Файл artisan не найден, создаем временный Laravel каркас..."
     
-    # Создаем временный Laravel проект
+    # Создаем временный Laravel проект с совместимой версией
     cd /tmp
-    composer create-project laravel/laravel laravel_skeleton_temp --no-interaction --prefer-dist
+    composer create-project laravel/laravel:^10.0 laravel_skeleton_temp --no-interaction --prefer-dist
     cd laravel_skeleton_temp
     
     # Копируем необходимые файлы Laravel
@@ -137,6 +138,33 @@ if [ ! -f "artisan" ]; then
     if [ -f "server.php" ]; then
         cp server.php /var/www/ftr/ 2>/dev/null || echo "server.php не найден"
     fi
+    
+    # Исправляем bootstrap/app.php для Laravel 10
+    cd /var/www/ftr
+    cat > bootstrap/app.php << 'EOF'
+<?php
+
+$app = new Illuminate\Foundation\Application(
+    $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
+);
+
+$app->singleton(
+    Illuminate\Contracts\Http\Kernel::class,
+    App\Http\Kernel::class
+);
+
+$app->singleton(
+    Illuminate\Contracts\Console\Kernel::class,
+    App\Console\Kernel::class
+);
+
+$app->singleton(
+    Illuminate\Contracts\Debug\ExceptionHandler::class,
+    App\Exceptions\Handler::class
+);
+
+return $app;
+EOF
     
     # Очищаем временный проект
     cd /var/www/ftr
