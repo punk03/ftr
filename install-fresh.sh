@@ -35,8 +35,15 @@ rm -f /etc/apt/sources.list.d/ondrej-ubuntu-php-*.list
 rm -f /etc/apt/sources.list.d/ondrej-*.list
 rm -f /etc/apt/sources.list.d/*sury*.list
 rm -f /etc/apt/sources.list.d/*ondrej*.list
+# Удаляем из основного файла sources.list
+sed -i '/packages.sury.org/d' /etc/apt/sources.list
+sed -i '/ondrej/d' /etc/apt/sources.list
+# Удаляем все ключи
 apt-key del 4F4EA0AAE5267A6C 2>/dev/null || true
 apt-key del 14AA40EC0831756756D7F66C4F4EA0AAE5267A6C 2>/dev/null || true
+# Очищаем кэш apt
+rm -rf /var/lib/apt/lists/*
+rm -rf /var/cache/apt/archives/*
 
 # Обновление системы
 echo "📦 Обновляем систему..."
