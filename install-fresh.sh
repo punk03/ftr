@@ -46,6 +46,10 @@ apt-key del 14AA40EC0831756756D7F66C4F4EA0AAE5267A6C 2>/dev/null || true
 rm -rf /var/lib/apt/lists/*
 rm -rf /var/cache/apt/archives/*
 
+# Установка python3-apt для исправления ошибки apt_pkg
+echo "🐍 Устанавливаем python3-apt..."
+apt install -y python3-apt
+
 # Обновление системы
 echo "📦 Обновляем систему..."
 apt update -y
@@ -54,7 +58,6 @@ apt upgrade -y
 # Установка пакетов
 echo "📦 Устанавливаем пакеты..."
 apt install -y \
-    python3-apt \
     php \
     php-fpm \
     php-mysql \
