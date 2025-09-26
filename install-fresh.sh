@@ -787,6 +787,14 @@ EOF
 
 chmod +x /var/www/ftr/backup.sh
 
+# Очистка кэша Laravel
+echo "🧹 Очищаем кэш Laravel..."
+cd /var/www/ftr
+php artisan config:clear
+php artisan cache:clear
+php artisan route:clear
+php artisan view:clear
+
 # Перезапуск сервисов
 echo "🔄 Перезапускаем сервисы..."
 systemctl restart php${PHP_VERSION}-fpm
@@ -855,6 +863,24 @@ else
     TEST_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/test.php)
     echo "Тест PHP: HTTP $TEST_CODE"
     rm -f /var/www/ftr/public/test.php
+    
+    echo "📋 Проверяем логи Laravel..."
+    if [ -f /var/www/ftr/storage/logs/laravel.log ]; then
+        echo "Последние ошибки Laravel:"
+        tail -20 /var/www/ftr/storage/logs/laravel.log
+    else
+        echo "Лог Laravel не найден"
+    fi
+    
+    echo "📋 Проверяем конфигурацию Laravel..."
+    echo "Проверяем .env файл:"
+    if [ -f /var/www/ftr/.env ]; then
+        echo "APP_KEY существует: $(grep -c 'APP_KEY=' /var/www/ftr/.env)"
+        echo "DB_CONNECTION: $(grep 'DB_CONNECTION=' /var/www/ftr/.env)"
+        echo "DB_DATABASE: $(grep 'DB_DATABASE=' /var/www/ftr/.env)"
+    else
+        echo ".env файл не найден"
+    fi
     
     echo "📋 Проверяем статус сервисов..."
     systemctl status nginx --no-pager -l
