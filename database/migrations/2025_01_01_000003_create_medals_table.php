@@ -21,7 +21,8 @@ return new class extends Migration
             $table->text('participants_list')->nullable();
             $table->timestamps();
             
-            $table->foreign('group_id')->references('id')->on('groups')->onDelete('cascade');
+            // Внешний ключ будет добавлен позже, когда таблица groups будет существовать
+            $table->index('group_id');
         });
     }
 
