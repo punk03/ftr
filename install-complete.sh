@@ -108,6 +108,24 @@ cd /var/www/ftr || { echo "Ошибка: не удалось перейти в /
 echo "DEBUG: Текущая директория: $(pwd)"
 echo "DEBUG: Содержимое директории:"
 ls -la
+
+# Если отсутствует artisan, подтянем недостающие файлы каркаса Laravel
+if [ ! -f "artisan" ]; then
+  echo "DEBUG: artisan не найден — создаю временный каркас Laravel и копирую недостающие файлы"
+  TMP_LARA="/tmp/laravel_skeleton_$$"
+  rm -rf "$TMP_LARA"
+  mkdir -p "$TMP_LARA"
+  composer create-project --quiet --no-dev --prefer-dist laravel/laravel:^10.0 "$TMP_LARA"
+  [ -f artisan ] || cp -n "$TMP_LARA/artisan" ./
+  [ -f server.php ] || cp -n "$TMP_LARA/server.php" ./
+  for d in bootstrap public config; do
+    if [ ! -d "$d" ]; then
+      cp -rn "$TMP_LARA/$d" ./
+    fi
+  done
+  rm -rf "$TMP_LARA"
+fi
+
 if [ ! -f "composer.json" ]; then
     echo "ERROR: Файл composer.json не найден в директории $(pwd)"
     exit 1
