@@ -54,6 +54,7 @@ apt upgrade -y
 # Установка пакетов
 echo "📦 Устанавливаем пакеты..."
 apt install -y \
+    python3-apt \
     php \
     php-fpm \
     php-mysql \
