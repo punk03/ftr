@@ -35,6 +35,7 @@ rm -f /etc/apt/sources.list.d/ondrej-ubuntu-php-*.list
 rm -f /etc/apt/sources.list.d/ondrej-*.list
 rm -f /etc/apt/sources.list.d/*sury*.list
 rm -f /etc/apt/sources.list.d/*ondrej*.list
+rm -f /etc/apt/sources.list.d/php.list
 # Удаляем из основного файла sources.list
 sed -i '/packages.sury.org/d' /etc/apt/sources.list
 sed -i '/ondrej/d' /etc/apt/sources.list
