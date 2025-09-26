@@ -709,6 +709,10 @@ echo "💾 Создаем директорию бэкапов..."
 mkdir -p /var/backups/ftr
 chown -R www-data:www-data /var/backups/ftr
 
+# Определяем версию PHP
+PHP_VERSION=$(php -r "echo PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;")
+echo "🔍 Обнаружена версия PHP: $PHP_VERSION"
+
 # Настройка Nginx
 echo "🌐 Настраиваем Nginx..."
 cat > /etc/nginx/sites-available/ftr <<EOF
@@ -723,7 +727,7 @@ server {
     }
 
     location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php${PHP_VERSION}-fpm.sock;
         fastcgi_param SCRIPT_FILENAME \$realpath_root\$fastcgi_script_name;
         include fastcgi_params;
     }
@@ -751,7 +755,7 @@ php artisan migrate --force
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
-systemctl reload php8.3-fpm
+systemctl reload php${PHP_VERSION}-fpm
 systemctl reload nginx
 echo "✅ Обновление завершено"
 EOF
@@ -777,14 +781,22 @@ chmod +x /var/www/ftr/backup.sh
 
 # Перезапуск сервисов
 echo "🔄 Перезапускаем сервисы..."
-systemctl restart php8.3-fpm
+systemctl restart php${PHP_VERSION}-fpm
 systemctl restart nginx
 systemctl restart mysql
+
+# Проверка конфигурации Nginx
+echo "🔍 Проверяем конфигурацию Nginx..."
+nginx -t
+if [ $? -ne 0 ]; then
+    echo "❌ Ошибка в конфигурации Nginx"
+    exit 1
+fi
 
 # Проверка статуса
 echo "✅ Проверяем статус..."
 systemctl is-active --quiet nginx && echo "✅ Nginx работает" || echo "❌ Nginx не работает"
-systemctl is-active --quiet php8.3-fpm && echo "✅ PHP-FPM работает" || echo "❌ PHP-FPM не работает"
+systemctl is-active --quiet php${PHP_VERSION}-fpm && echo "✅ PHP-FPM работает" || echo "❌ PHP-FPM не работает"
 systemctl is-active --quiet mysql && echo "✅ MySQL работает" || echo "❌ MySQL не работает"
 
 # Проверка сайта
@@ -793,6 +805,15 @@ if curl -s -o /dev/null -w "%{http_code}" http://localhost | grep -q "200\|404";
     echo "✅ Сайт доступен"
 else
     echo "❌ Сайт недоступен"
+    echo "🔍 Диагностика проблем:"
+    echo "📋 Проверяем логи Nginx..."
+    tail -5 /var/log/nginx/error.log 2>/dev/null || echo "Логи Nginx недоступны"
+    echo "📋 Проверяем логи PHP-FPM..."
+    tail -5 /var/log/php${PHP_VERSION}-fpm.log 2>/dev/null || echo "Логи PHP-FPM недоступны"
+    echo "📋 Проверяем права доступа..."
+    ls -la /var/www/ftr/public/ 2>/dev/null || echo "Директория public недоступна"
+    echo "📋 Проверяем файл index.php..."
+    ls -la /var/www/ftr/public/index.php 2>/dev/null || echo "Файл index.php не найден"
 fi
 
 echo ""
