@@ -109,9 +109,9 @@ echo "DEBUG: Текущая директория: $(pwd)"
 echo "DEBUG: Содержимое директории:"
 ls -la
 
-# Если отсутствует artisan, подтянем недостающие файлы каркаса Laravel
-if [ ! -f "artisan" ]; then
-  echo "DEBUG: artisan не найден — создаю временный каркас Laravel и копирую недостающие файлы"
+# Если отсутствует artisan или bootstrap/app.php, подтянем недостающие файлы каркаса Laravel
+if [ ! -f "artisan" ] || [ ! -f "bootstrap/app.php" ]; then
+  echo "DEBUG: Недостающие файлы Laravel — создаю временный каркас и копирую недостающие файлы"
   TMP_LARA="/tmp/laravel_skeleton_$$"
   rm -rf "$TMP_LARA"
   mkdir -p "$TMP_LARA"
