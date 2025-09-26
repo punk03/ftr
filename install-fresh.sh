@@ -605,6 +605,14 @@ chown -R www-data:www-data /var/www/ftr
 chmod -R 755 /var/www/ftr
 chmod -R 775 /var/www/ftr/storage /var/www/ftr/bootstrap/cache
 
+# Дополнительная проверка прав
+echo "🔍 Проверяем права доступа..."
+ls -la /var/www/ftr/public/
+echo "Права на storage:"
+ls -la /var/www/ftr/storage/
+echo "Права на bootstrap/cache:"
+ls -la /var/www/ftr/bootstrap/cache/
+
 # Создание .env
 echo "⚙️  Настраиваем окружение..."
 if [ -f ".env.example" ]; then
@@ -801,19 +809,56 @@ systemctl is-active --quiet mysql && echo "✅ MySQL работает" || echo "
 
 # Проверка сайта
 echo "🌐 Проверяем сайт..."
-if curl -s -o /dev/null -w "%{http_code}" http://localhost | grep -q "200\|404"; then
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost)
+echo "📊 HTTP код ответа: $HTTP_CODE"
+
+if echo "$HTTP_CODE" | grep -q "200\|404"; then
     echo "✅ Сайт доступен"
 else
     echo "❌ Сайт недоступен"
     echo "🔍 Диагностика проблем:"
+    
     echo "📋 Проверяем логи Nginx..."
-    tail -5 /var/log/nginx/error.log 2>/dev/null || echo "Логи Nginx недоступны"
+    if [ -f /var/log/nginx/error.log ]; then
+        echo "Последние ошибки Nginx:"
+        tail -10 /var/log/nginx/error.log
+    else
+        echo "Файл логов Nginx не найден"
+    fi
+    
     echo "📋 Проверяем логи PHP-FPM..."
-    tail -5 /var/log/php${PHP_VERSION}-fpm.log 2>/dev/null || echo "Логи PHP-FPM недоступны"
+    if [ -f /var/log/php${PHP_VERSION}-fpm.log ]; then
+        echo "Последние записи PHP-FPM:"
+        tail -10 /var/log/php${PHP_VERSION}-fpm.log
+    else
+        echo "Файл логов PHP-FPM не найден"
+    fi
+    
+    echo "📋 Проверяем конфигурацию Nginx..."
+    cat /etc/nginx/sites-available/ftr
+    
     echo "📋 Проверяем права доступа..."
     ls -la /var/www/ftr/public/ 2>/dev/null || echo "Директория public недоступна"
+    
     echo "📋 Проверяем файл index.php..."
-    ls -la /var/www/ftr/public/index.php 2>/dev/null || echo "Файл index.php не найден"
+    if [ -f /var/www/ftr/public/index.php ]; then
+        echo "Файл index.php найден:"
+        ls -la /var/www/ftr/public/index.php
+        echo "Содержимое первых строк index.php:"
+        head -5 /var/www/ftr/public/index.php
+    else
+        echo "Файл index.php не найден"
+    fi
+    
+    echo "📋 Проверяем доступность PHP..."
+    echo "<?php phpinfo(); ?>" > /var/www/ftr/public/test.php
+    TEST_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/test.php)
+    echo "Тест PHP: HTTP $TEST_CODE"
+    rm -f /var/www/ftr/public/test.php
+    
+    echo "📋 Проверяем статус сервисов..."
+    systemctl status nginx --no-pager -l
+    systemctl status php${PHP_VERSION}-fpm --no-pager -l
 fi
 
 echo ""
