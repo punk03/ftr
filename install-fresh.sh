@@ -117,6 +117,32 @@ git clone https://github.com/punk03/ftr.git .
 
 # Установка зависимостей
 echo "📦 Устанавливаем зависимости..."
+
+# Проверяем наличие artisan файла
+if [ ! -f "artisan" ]; then
+    echo "⚠️  Файл artisan не найден, создаем временный Laravel каркас..."
+    
+    # Создаем временный Laravel проект
+    cd /tmp
+    composer create-project laravel/laravel laravel_skeleton_temp --no-interaction --prefer-dist
+    cd laravel_skeleton_temp
+    
+    # Копируем необходимые файлы Laravel
+    cp artisan /var/www/ftr/ 2>/dev/null || echo "artisan не найден в временном проекте"
+    cp -r bootstrap /var/www/ftr/ 2>/dev/null || echo "bootstrap не найден"
+    cp -r public /var/www/ftr/ 2>/dev/null || echo "public не найден"
+    cp -r config /var/www/ftr/ 2>/dev/null || echo "config не найден"
+    
+    # Проверяем наличие server.php
+    if [ -f "server.php" ]; then
+        cp server.php /var/www/ftr/ 2>/dev/null || echo "server.php не найден"
+    fi
+    
+    # Очищаем временный проект
+    cd /var/www/ftr
+    rm -rf /tmp/laravel_skeleton_temp
+fi
+
 composer install --no-dev --optimize-autoloader
 
 # Настройка прав
@@ -136,11 +162,19 @@ sed -i 's/APP_DEBUG=.*/APP_DEBUG=false/' .env
 
 # Генерация ключа
 echo "🔑 Генерируем ключ..."
-php artisan key:generate
+if [ -f "artisan" ]; then
+    php artisan key:generate
+else
+    echo "⚠️  Файл artisan не найден, пропускаем генерацию ключа"
+fi
 
 # Запуск миграций
 echo "🗄️  Запускаем миграции..."
-php artisan migrate --force
+if [ -f "artisan" ]; then
+    php artisan migrate --force
+else
+    echo "⚠️  Файл artisan не найден, пропускаем миграции"
+fi
 
 # Создание директории бэкапов
 echo "💾 Создаем директорию бэкапов..."
