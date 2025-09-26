@@ -48,12 +48,12 @@ rm -rf /var/cache/apt/archives/*
 
 # Установка python3-apt для исправления ошибки apt_pkg
 echo "🐍 Устанавливаем python3-apt..."
-apt install -y python3-apt
+apt install -y python3-apt || true
 
 # Обновление системы
 echo "📦 Обновляем систему..."
-apt update -y
-apt upgrade -y
+apt update -y || true
+apt upgrade -y || true
 
 # Установка пакетов
 echo "📦 Устанавливаем пакеты..."
