@@ -28,6 +28,12 @@ rm -f /etc/nginx/sites-enabled/ftr
 rm -f /etc/nginx/sites-available/ftr
 rm -f /etc/cron.d/ftr-backup
 
+# Удаление проблемных репозиториев
+echo "🧹 Очищаем проблемные репозитории..."
+rm -f /etc/apt/sources.list.d/sury-php.list
+rm -f /etc/apt/sources.list.d/ondrej-ubuntu-php-*.list
+apt-key del 4F4EA0AAE5267A6C 2>/dev/null || true
+
 # Обновление системы
 echo "📦 Обновляем систему..."
 apt update -y
