@@ -139,6 +139,14 @@ if [ ! -f "artisan" ]; then
         cp server.php /var/www/ftr/ 2>/dev/null || echo "server.php не найден"
     fi
     
+    # Создаем необходимые директории Laravel в основном проекте
+    mkdir -p /var/www/ftr/storage/app/public
+    mkdir -p /var/www/ftr/storage/framework/cache
+    mkdir -p /var/www/ftr/storage/framework/sessions
+    mkdir -p /var/www/ftr/storage/framework/views
+    mkdir -p /var/www/ftr/storage/logs
+    mkdir -p /var/www/ftr/bootstrap/cache
+    
     # Исправляем bootstrap/app.php для Laravel 10
     cd /var/www/ftr
     cat > bootstrap/app.php << 'EOF'
